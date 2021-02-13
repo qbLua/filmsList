@@ -9,6 +9,7 @@ function ModalAdd(props) {
   const [open, setOpen] = React.useState(false);
   const insertFilm = (values) => {
     values.dateAdd = new Date();
+    values.rating = values.rating.match(/\d\.0+/)?values.rating[0]:values.rating;
     db.collection("films").add(values).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
     }).catch((error) => {
@@ -28,20 +29,27 @@ function ModalAdd(props) {
         initialValues={{}}
         validationSchema={Yup.object().shape({
           title: Yup.string()
+          .trim()
           .min(1)
           .required('Required'),
-          year: Yup.string()
-          .min(1)
+          year: Yup.date()
+          .min(new Date(1895, 2, 22))
+          .max(new Date(Date.now() + 86400000))
           .required('Required'),
           author: Yup.string()
+          .trim()
           .min(0)
           .required('Required'),
           duration: Yup.string()
-          .min(0)
-          .required('Required'),
-          rating: Yup.string()
+          .notOneOf(
+            ['00:00']
+          )
           .min(1)
-          .max(2)
+          .required('Required'),
+          rating: Yup.number()
+          .min(1)
+          .max(10)
+          .integer()
           .required('Required'),
           })}
         onSubmit={(values) => insertFilm(values)}>
