@@ -4,36 +4,72 @@ import db from '../initFB/firebase';
 import { Formik } from 'formik';
 import '../css/modal.css';
 import * as Yup from 'yup';
+import errorMessages from '../errorMessages';
 
-function ModalAdd(props) {
+function ModalWindow(props) {
+  // Хук для открытия и закрытия модального окна
   const [open, setOpen] = React.useState(false);
-  const insertFilm = (values) => {
-    values.dateAdd = new Date();
-    values.rating = values.rating.match(/\d\.0+/)?values.rating[0]:values.rating;
-    db.collection("films").add(values).then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-    }).catch((error) => {
-      console.error("Error adding document: ", error);
-    });
-    setOpen(false);
-    props.onClose();
+
+  // Объект, необходимый для установки в форму начальных значений
+  // Используется при редактировании, что позволяет открыть модальное окно с уже заполненными полями
+  // В случае с добавлением, то начальные значения будут отсутствовать
+  const data = props.data?props.data:{};
+  const initialValues = {
+    title: data.title,
+    year: data.year,
+    author: data.author,
+    duration: data.duration,
+    rating: data.rating,
   }
+
+  // Далее определяются кнопки и подписи для редактирования и добавления
+  const btn = props.edit?<i class="edit link icon"></i>:<Button className={'add green'}>Добавить</Button>;
+  const modalTitle = props.edit?'Изменить фильм':'Добавить новый фильм';
+  const btnContent = props.edit?'Изменить':'Добавить';
+  
+  // Функция для обновления БД
+  const insertFilm = (values) => {
+    // Изменение записи
+    if (props.edit) {
+      values.rating = values.rating.match(/\d\.0+/)?values.rating[0]:values.rating;
+      db.collection("films").doc(props.data.id).update(values).then((docRef) => {
+        props.data.reload();
+        console.log("Document successfully updated!");
+      }).catch((error) => {
+        console.error("Error updating document: ", error);
+      });
+    } 
+    // Добавление записи
+    else {
+      // Устанавливается время добавления записи, для возможности их сортировки от новых к старым
+      values.dateAdd = new Date();
+      values.rating = values.rating.match(/\d\.0+/)?values.rating[0]:values.rating;
+      db.collection("films").add(values).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+      }).catch((error) => {
+        console.error("Error adding document: ", error);
+      });
+      props.onClose();
+    }
+    setOpen(false);
+  }
+
 
   return (
     <Modal
       onClose={() => setOpen(false)}
       onOpen={() => setOpen(true)}
       open={open}
-      trigger={<Button className={'add green'}>Добавить</Button>}>
+      trigger={btn}>
       <Formik
-        initialValues={{}}
+        initialValues={initialValues}
+        // Валидация введенных значений
         validationSchema={Yup.object().shape({
           title: Yup.string()
           .trim()
           .min(1)
           .required('Required'),
           year: Yup.date()
-          .min(new Date(1895, 2, 22))
           .max(new Date(Date.now() + 86400000))
           .required('Required'),
           author: Yup.string()
@@ -55,7 +91,7 @@ function ModalAdd(props) {
         onSubmit={(values) => insertFilm(values)}>
         {props => (
           <>
-            <Modal.Header>Добавить новый фильм</Modal.Header>
+            <Modal.Header>{modalTitle}</Modal.Header>
             <Modal.Content image>
               <Modal.Description>
                 <Form className={'ui form'} onSubmit={props.handleSubmit}>
@@ -107,10 +143,11 @@ function ModalAdd(props) {
                       <Button color='black' onClick={() => setOpen(false)}>Cancel</Button>
                       <Button
                         type="submit"
-                        content="Add"
+                        content={btnContent}
                         labelPosition='right'
                         icon='checkmark'
                         positive
+                        onClick={errorMessages}
                       />
                     </div>
                   </Modal.Actions>
@@ -124,4 +161,4 @@ function ModalAdd(props) {
   )
 }
 
-export default ModalAdd
+export default ModalWindow;

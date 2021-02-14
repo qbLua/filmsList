@@ -2,7 +2,6 @@ import React from 'react';
 import Item from './Item';
 
 const TableFilms = (props) => {
-
   return (
     <>
         <table class="ui single line table">
@@ -17,6 +16,7 @@ const TableFilms = (props) => {
             </tr>
           </thead>
           <tbody>
+              {/* Перебор массива с данными о  */}
               {props.films.map((film) => {
               return <Item title={film.title}
                 year={film.year}

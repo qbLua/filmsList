@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import ModalAdd from './Modal';
 import db from '../initFB/firebase';
 import TableFilms from './tableFilms';
+import ModalWindow from './Modal';
 
-function Main(props) {
-
+function Main() {
+  // Данный хук и функция служат двум целям:
+  // 1. Первоначальное отображение списка фильмов
+  // 2. Обновление этого списка после добавления новой записи или изменении старой
   const [list, setList] = useState([]);
 
   const getList = () => {
@@ -25,7 +27,7 @@ function Main(props) {
   
   return (
     <div>
-      <ModalAdd onClose={getList} />
+      <ModalWindow onClose={getList} />
       <TableFilms films={list} reload={getList} />
     </div>
   );
