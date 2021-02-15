@@ -1,7 +1,8 @@
 const errorMessages = () => {
     const title = document.getElementsByName('title')[0];
     const year = document.getElementsByName('year')[0];
-    const yearValue = year + 'T00:00:00';
+    const yearValue = new Date(year.value + 'T00:00:00');
+    const today = new Date().setHours(0, 0, 0, 0);
     const author = document.getElementsByName('author')[0];
     const duration = document.getElementsByName('duration')[0];
     const rating = document.getElementsByName('rating')[0];
@@ -11,8 +12,7 @@ const errorMessages = () => {
     } else {
         title.style.border = ''
     }
-
-    if (new Date(yearValue) > (new Date() - 86400000) || year.value === '') {
+    if (yearValue > today || year.value === '') {
         year.style.border = '3px solid red'
     } else {
         year.style.border = '';

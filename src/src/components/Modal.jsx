@@ -70,7 +70,7 @@ function ModalWindow(props) {
           .min(1)
           .required('Required'),
           year: Yup.date()
-          .max(new Date(Date.now() + 86400000))
+          .max(new Date())
           .required('Required'),
           author: Yup.string()
           .trim()
